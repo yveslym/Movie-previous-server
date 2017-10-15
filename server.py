@@ -70,7 +70,15 @@ class User(Resource):
     @user_auth
     def get(self):
 
-        auth_code = request.headers
+        auth_code = request.headers['authorization']
+        email,password = decode(auth_code)
+        user_dict = app.db.users.find_one({'email':'password'})
+        user_dict.pop('password')
+        return(user_dict,200,None)
+
+    @user_auth
+    def delete (self):
+
 
 
 
