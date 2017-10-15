@@ -76,8 +76,19 @@ class User(Resource):
         user_dict.pop('password')
         return(user_dict,200,None)
 
+    # function to delete user
+    #auth user
+    #delete all movie recorded for the user
+    #delete user
     @user_auth
     def delete (self):
+        auth_code = request.headers['authorization']
+        email,password = decode(auth_code)
+
+        ## delete many movie code here
+
+        app.db.users.delete_one({'email':'password'})
+        return ({'delete':'user deleted'},200,None)
 
 
 
