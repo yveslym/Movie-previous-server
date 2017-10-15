@@ -19,6 +19,7 @@ app.db = mongo.movie-preview
 rounds = app.bcrypt_rounds = 12
 api = Api(app)
 
+
 class User(Resource):
     def __init__(self):
         first_name = ""
@@ -27,7 +28,25 @@ class User(Resource):
         password = ""
         user_name = ""
         movie_id = []
+# function to authentificate user
+# check if the email and password provided is the same in the db
+    def user_auth(func):
+        def wrapper(*args,**kwargs):
+            auth_code = request.headers['authorization']
+            email,password = decode(auth_code)
+            user_dict = app.db.users.find_one({'email':email})
+            if user_dict is not None:
+                encoded_pw = password.encode('utf-8')
+                if bcrypt.hashpw(encoded_pw,user_dict['password']) == user_dict['password']:
+                    return func(*args, **kwargs)
+                else:
+                    return ({'error':'email or password incorect'},401,None)
+            else:
+                return({'error':'user does not exist'},400,None)
+    return wrapper
 
+    # function to ad user in the data base
+    # check if the user fill out all field and add
     def post(self):
         json_data = request.json
         first_name = json_data.get["first_name"]
@@ -38,7 +57,7 @@ class User(Resource):
         if first_name is not None and last_name is not None and email is not None and password is not None:
             user_col = app.db.users
             encoded_password = password.encode("uft-8")
-            ashed = bcrypt(encoded_password,bcrypt.gensalt(rounds))
+            ashed = bcrypt.hashpw(encoded_password,bcrypt.gensalt(rounds))
             user_dict = json_data
             user_dict['password'] = ashed
             user_col.insert_one(user_dict)
@@ -46,7 +65,13 @@ class User(Resource):
         else:
             return({'error':'fill out all field'},400,None)
 
+    #function to get user from the database
+    #check first if the user auth is correct the get the user
+    @user_auth
     def get(self):
+
+        auth_code = request.headers
+
 
 
 
